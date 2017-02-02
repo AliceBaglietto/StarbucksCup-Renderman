@@ -1,0 +1,152 @@
+Display "assignment.exr" "framebuffer" "rgba"
+Format 800 600 1.0
+DepthOfField 2.8 0.100 5
+Exposure 1.2 2.2
+Quantize "rgba" 255 0 255 0
+PixelVariance 0.01
+Projection "perspective" "fov" [30]
+Hider "raytrace" "string integrationmode" ["path"] "int maxsamples" [1024] "int incremental" [2]
+Integrator "PxrDefault" "integrator"
+Integrator "PxrDirectLighting" "integrator"
+Integrator "PxrPathTracer" "integrator"
+
+#World Position/Camera
+Translate -2 -1 8
+Rotate 45 0 1 0
+Rotate -10 0 0 1
+
+WorldBegin
+    #LIGHTING
+    LightSource "ambientlight" 1 "intensity" [25]
+    AttributeBegin
+        AreaLightSource "PxrStdAreaLight" "theLight" "float exposure" [7] "float enableTemperature" [1] "float temperature" [6000]
+        Translate 0 5 -4
+        Sphere 0.3 -0.3 0.3 360
+    AttributeEnd
+    AttributeBegin
+        AreaLightSource "PxrStdAreaLight" "theLight" "float exposure" [5.5]
+        Translate 2 5 5
+        Sphere 0.5 -0.5 0.5 360
+    AttributeEnd
+    AttributeBegin
+        AreaLightSource "PxrStdEnvMapLight" "theLight" "float exposure" [6] "float importance" [2]
+        Translate 0 0 8
+        Sphere 0.5 -0.5 0.5 360
+    AttributeEnd
+    AttributeBegin
+        AreaLightSource "PxrStdAreaLight" "theLight" "float exposure" [0.5]
+            "float enableEmissionMap" [1]
+            "string rman__EmissionMap" ["room.tx"]
+            "float linearizeEmissionMap" [1]
+        Translate 0 0 0
+        Rotate -90 1 0 0 
+        Geometry "envsphere" "constant float radius" [10]
+    AttributeEnd
+
+    #OBJECT: CUP
+    AttributeBegin
+        #textured body
+        AttributeBegin
+            Pattern "PxrOSL" "tex" "string shader" "tex" "color Cin" [0 1 0]
+            Bxdf "PxrDisney" "forTheBody" "reference color baseColor" ["tex:Cout"] 
+                  "float sheen" [1]
+            Surface "matte"
+            TransformBegin
+                Translate 0 -0.8 2
+                Rotate -90 1 0 0
+                Hyperboloid 0.87 0 0 1.2 0 3.2 360
+            TransformEnd
+        AttributeEnd
+    AttributeEnd
+
+    #LID
+    AttributeBegin  
+        #color and noise
+        Pattern "PxrOSL" "tea" "string shader" "tea" "color Cin" [0 1 0]
+        Bxdf "PxrDisney" "forTheBody" "reference color baseColor" ["tea:Cout"] 
+        #lower ring  
+        TransformBegin
+            Rotate 90 0 1 0
+            Rotate -90 1 0 0  
+            Translate -2 0 2.07
+            Surface "plastic"
+            Torus 1.1 .3 60 100 360
+        TransformEnd
+        #Thin cylinder
+        TransformBegin
+            Rotate 90 0 1 0
+            Rotate -90 1 0 0
+            Translate -2 0 2.35
+            Surface "plastic"
+            Hyperboloid 1.2 0 0 1.21 0 0.13 360
+        TransformEnd
+        #torus 
+        TransformBegin
+            Rotate 90 0 1 0
+            Rotate -90 1 0 0  
+            Translate -2 0 2.45
+            Surface "plastic"
+            Torus 1.18 0.05 0 360 360
+        TransformEnd
+        #lower disk
+        TransformBegin
+            Rotate 90 1 0 0
+            Translate 0 2 0
+            Surface "plastic"
+            Disk -2.45 1.2 360  
+        TransformEnd
+        #big cilinder 
+        TransformBegin
+            Rotate 90 0 1 0
+            Rotate -90 1 0 0  
+            Translate -2 0 2.35
+            Rotate -5 0 1 0
+            Surface "plastic"
+            Cylinder 1.1 0 0.35 360
+        TransformEnd
+        #Inner cilinder
+        TransformBegin
+            Rotate 90 0 1 0
+            Rotate -90 1 0 0  
+            Translate -2 0 2.315
+            Rotate -5 0 1 0  
+            Surface "plastic"
+            Cylinder 0.905 0 0.35 360
+        TransformEnd
+        #top of the big cilinder
+        TransformBegin
+            Rotate 90 1 0 0
+            Translate 0 2.053 -2.96
+            Rotate 5 1 0 0  
+            Surface "plastic"
+            Torus 0.951 0.3 60 100 360
+        TransformEnd
+        #Disk
+        TransformBegin
+            Rotate 90 1 0 0
+            Translate 0 2.03 -3.59  
+            Surface "plastic"
+            Disk 1 0.9 360  
+        TransformEnd
+    AttributeEnd
+
+    #ENVIRONMENT
+    #Table
+    AttributeBegin
+      TransformBegin
+        Pattern "PxrOSL" "wood" "string shader" "wood" "color Cin" [0 1 0]
+        Bxdf "PxrDisney" "forTheBody" "reference color baseColor" ["wood:Cout"] 
+        Translate 4 -2.7 2
+        Patch "bilinear" "P" [-8 2 -8
+                               8 2 -8
+                              -8 2 8
+                               8 2 8] 
+      TransformEnd
+    AttributeEnd
+
+    #Environment Map: white wall
+    Pattern "PxrOSL" "wall" "string shader" "wall" "color Cin" [0 1 0]
+    Bxdf "PxrDisney" "forTheBody" "reference color baseColor" ["wall:Cout"] 
+    Sphere 9 -9 9 360
+    
+WorldEnd
